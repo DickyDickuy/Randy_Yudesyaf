@@ -40,7 +40,7 @@
 
 		<main class="relative min-h-screen overflow-hidden">
 			<div class="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col px-5 pb-16 pt-8 sm:px-8 lg:px-16">
-				<header class="hero-header relative flex items-center justify-between lg:justify-center">
+				<header class="hero-header relative flex items-center justify-between pb-6 lg:justify-center lg:pb-10">
 					<div class="hero-logo-mobile block w-14 sm:w-20 md:w-24 lg:hidden" aria-hidden="true">
 						<img src="Assets/img/mascot.jpg" alt="" class="w-full h-auto" loading="lazy" />
 					</div>
@@ -52,21 +52,35 @@
 				</header>
 
 				<section class="hero-body relative mt-16 flex flex-1 flex-col items-center gap-16 text-center lg:mt-28">
-					<div class="hero-left hidden lg:block">
+					<div class="hero-left hidden lg:block" aria-hidden="true">
 						<div class="hero-logo-desktop w-[180px] xl:w-[210px]">
 							<img src="Assets/img/mascot.jpg" alt="Mascot logo" class="w-full h-auto" />
 						</div>
 
 					</div>
 
-					<div class="hero-copy order-1 flex w-full max-w-3xl flex-col items-center gap-8 text-center lg:order-none lg:max-w-[800px]">
+					<div class="hero-copy order-1 flex w-full max-w-3xl flex-col items-center gap-8 text-center lg:order-none lg:max-w-[900px]">
 						<div class="space-y-4 lg:space-y-6">
 							<h1 class="font-display text-[clamp(2.6rem,7vw,5.4rem)] font-medium leading-tight">
 								Hi my name is
 							</h1>
-							<p class="font-accent text-[clamp(3.2rem,8vw,7rem)] italic leading-[1.05]">
-								Randy Yudesyaf
-							</p>
+							<div class="hero-name font-accent text-[clamp(3.2rem,8vw,7rem)] italic leading-[1.05]">
+								<span class="hero-name__word">Randy</span>
+								<div class="hero-portrait" data-cursor="hover" tabindex="0">
+									<img
+										src="Assets/img/RandyOrange.png"
+										alt="Portrait of Randy"
+										class="hero-portrait__img hero-portrait__img--base"
+									/>
+									<img
+										src="Assets/img/Randy.jpg"
+										alt=""
+										class="hero-portrait__img hero-portrait__img--color"
+										aria-hidden="true"
+									/>
+								</div>
+								<span class="hero-name__word">Yudesyaf</span>
+							</div>
 						</div>
 						<div class="mt-2 flex flex-col items-center gap-4 text-xl font-medium sm:flex-row sm:gap-6 sm:text-2xl lg:items-center lg:text-[1.65rem]">
 							<span>I'm a</span>
@@ -75,24 +89,7 @@
 						</div>
 					</div>
 
-					<div class="hero-badge order-2 w-full lg:order-none lg:w-auto">
-						<div class="badge" aria-hidden="true">
-							<svg class="badge__content" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<defs>
-									<path id="circlePath" d="M110 10a100 100 0 1 1 0 200a100 100 0 1 1 0-200Z" />
-								</defs>
-								<text class="badge__text">
-									<textPath href="#circlePath" startOffset="5%">
-										case studies * case studies * case studies * case studies *
-									</textPath>
-								</text>
-								<g class="badge__arrow" stroke="currentColor" stroke-width="6" stroke-linecap="round">
-									<line x1="110" y1="60" x2="110" y2="150" />
-									<polyline points="92,130 110,150 128,130" fill="none" />
-								</g>
-							</svg>
-						</div>
-					</div>
+					<!-- Decorative arrow removed per request -->
 				</section>
 			</div>
 		</main>
