@@ -64,4 +64,56 @@ const initCursor = () => {
   });
 };
 
-document.addEventListener('DOMContentLoaded', initCursor);
+const initPillRotation = () => {
+  const pill = document.querySelector('.pill');
+  if (!pill) return;
+
+  const variants = [
+    { text: 'Leader', fontFamily: '"Oswald", sans-serif', fontStyle: 'normal' },
+    { text: 'Brother', fontFamily: '"Poppins", sans-serif', fontStyle: 'normal' },
+    { text: 'Father', fontFamily: '"Merriweather", serif', fontStyle: 'normal' },
+    { text: 'Human', fontFamily: '"Quicksand", sans-serif', fontStyle: 'normal' }
+  ];
+
+  const measurer = document.createElement('span');
+  measurer.className = 'pill pill--measure';
+  document.body.appendChild(measurer);
+
+  let maxWidth = 0;
+  variants.forEach(({ text, fontFamily, fontStyle }) => {
+    measurer.style.fontFamily = fontFamily;
+    measurer.style.fontStyle = fontStyle;
+    measurer.textContent = text;
+    const width = measurer.getBoundingClientRect().width;
+    if (width > maxWidth) {
+      maxWidth = width;
+    }
+  });
+
+  measurer.remove();
+
+  if (maxWidth > 0) {
+    pill.style.width = `${Math.ceil(maxWidth)}px`;
+  }
+
+  let index = 0;
+  const applyVariant = ({ text, fontFamily, fontStyle }) => {
+    pill.textContent = text;
+    pill.style.fontFamily = fontFamily;
+    pill.style.fontStyle = fontStyle;
+  };
+
+  applyVariant(variants[index]);
+
+  setInterval(() => {
+    index = (index + 1) % variants.length;
+    applyVariant(variants[index]);
+  }, 1000);
+};
+
+const init = () => {
+  initCursor();
+  initPillRotation();
+};
+
+document.addEventListener('DOMContentLoaded', init);
