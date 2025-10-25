@@ -43,6 +43,15 @@ const initCursor = () => {
     // Update target instantly; dot will snap each frame
     targetX = event.clientX;
     targetY = event.clientY;
+
+    // Context-aware dot color: turn cream on orange backgrounds
+    const el = event.target;
+    const onPill = !!el.closest('.pill');
+    const onCsItem = !!el.closest('.cs-item');
+    const audio = el.closest('.audio-toggle');
+    const onOrangeAudio = !!(audio && audio.classList.contains('is-playing') && !audio.classList.contains('is-muted'));
+    const shouldCream = onPill || onCsItem || onOrangeAudio;
+    cursorDot.classList.toggle('is-cream', shouldCream);
     if (rafId === null) {
       rafId = requestAnimationFrame(updatePosition);
     }

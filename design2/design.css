@@ -282,14 +282,21 @@ body {
 	z-index: 101;
 }
 
+/* Dot color swap when on orange backgrounds */
+.cursor-dot.is-cream {
+	background: #fcf6e1;
+}
+
 .cursor.is-hover {
 	width: clamp(42px, 4.4vw, 58px);
 	height: clamp(42px, 4.4vw, 58px);
 }
 
 .cursor.is-solid {
-	background: #fc5203;
+	/* Avoid covering content: keep it an outline-only state */
+	background: transparent;
 	border-color: #fc5203;
+	border-width: 3px;
 }
 
 /* Audio toggle button */
