@@ -155,6 +155,7 @@ function initBackgroundMusic() {
   let player = null;
   let isMuted = true;
   let isPlaying = false;
+  const autoplayDelayMs = 1500; // delay autoplay attempt after reload
 
   // Read URL or ID from data attribute; supports full YouTube links
   const configured = (btn.getAttribute('data-yt') || '').trim();
@@ -212,6 +213,7 @@ function initBackgroundMusic() {
         controls: 0,
         modestbranding: 1,
         loop: 1,
+        playsinline: 1,
         // For loop to work YouTube requires a playlist param.
         // Use list if provided, otherwise repeat the same videoId.
         playlist: ytInfo.listId || ytInfo.videoId,
@@ -219,7 +221,7 @@ function initBackgroundMusic() {
       },
       events: {
         onReady: () => {
-          // Attempt autoplay with sound; if blocked, fall back to muted autoplay
+          // Attempt autoplay after a short delay; if blocked, fall back to muted autoplay
           const attemptAutoplay = () => {
             try {
               player.setVolume(60);
@@ -233,7 +235,7 @@ function initBackgroundMusic() {
                 const state = player.getPlayerState && player.getPlayerState();
                 // 1 = PLAYING, 3 = BUFFERING
                 if (state !== 1 && state !== 3) {
-                  // likely blocked: try muted autoplay
+                  // likely blocked: try muted autoplay (guaranteed by policy)
                   player.mute();
                   isMuted = true;
                   player.playVideo();
@@ -252,7 +254,7 @@ function initBackgroundMusic() {
               } catch {}
             }
           };
-          attemptAutoplay();
+          setTimeout(attemptAutoplay, autoplayDelayMs);
         }
       }
     });
@@ -276,7 +278,7 @@ function initBackgroundMusic() {
     updateButton();
   });
 
-  // Preload player immediately and attempt autoplay
+  // Preload player immediately; autoplay will be attempted after a short delay when ready
   ensurePlayer();
 }
 
