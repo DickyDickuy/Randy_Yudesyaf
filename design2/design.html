@@ -37,14 +37,22 @@
 			href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@600&family=Crimson+Pro:wght@600&family=Quicksand:wght@600&display=swap"
 			rel="stylesheet"
 		/>
-		<!-- Retro 8-bit font for 'Gamer' pill variant -->
-		<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+		<!-- Artistic numerals for case study numbers -->
+		<link
+			href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@600;700&display=swap"
+			rel="stylesheet"
+		/>
+	<!-- Minecraft (retro 8-bit) font for 'Gamer' pill variant -->
+	<link href="https://fonts.cdnfonts.com/css/minecraft" rel="stylesheet" />
+	<!-- Alternate Minecraft CSS (fallback) -->
+	<link href="https://fonts.cdnfonts.com/css/minecraft-4" rel="stylesheet" />
 		<link rel="stylesheet" href="design.css" />
 	</head>
 	<body class="bg-cream text-cobalt antialiased selection:bg-cobalt selection:text-cream">
 		<div id="cursor" class="cursor" aria-hidden="true"></div>
+		<div id="cursorDot" class="cursor-dot" aria-hidden="true"></div>
 
-		<main class="relative min-h-screen overflow-hidden">
+	<main class="relative min-h-screen overflow-hidden">
 			<div class="mx-auto flex min-h-screen w-full max-w-[1200px] flex-col px-5 pb-16 pt-8 sm:px-8 lg:px-16">
 				<header class="hero-header relative flex items-center justify-between pb-6 lg:justify-center lg:pb-10">
 					<div class="hero-logo-mobile block w-14 sm:w-20 md:w-24 lg:hidden" aria-hidden="true">
@@ -105,7 +113,7 @@
 						<div class="carousel-img-container">
 							<img src="Assets/img/cool_photo/2014.png" alt="2014" class="carousel-img" />
 							<div class="carousel-img-overlay">
-								<span class="carousel-img-year">2014</span>
+								<span class="carousel-img-year">08-2014</span>
 							</div>
 						</div>
 						<div class="carousel-img-container">
@@ -201,7 +209,72 @@
 					</div>
 				</div>
 			</section>
+
+			<!-- Case Studies Section (similar interactions) -->
+			<section class="cs-section" id="case-studies">
+				<div class="cs-header">case studies</div>
+				<ol class="cs-list">
+					<li class="cs-item" data-preview="Assets/img/cool_photo/2019.jpg">
+						<span class="cs-number">01</span>
+						<h3 class="cs-title">Project One</h3>
+						<ul class="cs-tags">
+							<li>Website Design</li>
+							<li>Branding</li>
+							<li>Interaction</li>
+						</ul>
+					</li>
+					<li class="cs-item" data-preview="Assets/img/cool_photo/2020.jpg">
+						<span class="cs-number">02</span>
+						<h3 class="cs-title">Project Two</h3>
+						<ul class="cs-tags">
+							<li>UX/UI</li>
+							<li>Research</li>
+							<li>Branding</li>
+						</ul>
+					</li>
+					<li class="cs-item" data-preview="Assets/img/cool_photo/2021.jpg">
+						<span class="cs-number">03</span>
+						<h3 class="cs-title">Project Three</h3>
+						<ul class="cs-tags">
+							<li>Product Design</li>
+							<li>Branding</li>
+						</ul>
+					</li>
+					<li class="cs-item" data-preview="Assets/img/cool_photo/2022.png">
+						<span class="cs-number">04</span>
+						<h3 class="cs-title">Project Four</h3>
+						<ul class="cs-tags">
+							<li>Animation</li>
+							<li>Interaction</li>
+						</ul>
+					</li>
+				</ol>
+				<!-- floating preview card -->
+				<div class="cs-preview" aria-hidden="true">
+					<img class="cs-preview__img" alt="Preview" src="Assets/img/cool_photo/2019.jpg" />
+				</div>
+			</section>
+
 		</main>
+
+		<!-- Hidden container for background music player -->
+		<div id="ytAudio" aria-hidden="true" style="position:fixed; left:-99999px; width:1px; height:1px; overflow:hidden;"></div>
+
+		<!-- Audio toggle button -->
+	<button id="audioToggle" class="audio-toggle" type="button" aria-pressed="false" data-cursor="hover" title="Play music"
+		data-yt="https://www.youtube.com/watch?v=9a8eBDuc3uA">
+			<span class="sr-only">Toggle background music</span>
+			<!-- Speaker (unmuted) -->
+			<svg class="icon icon-volume" viewBox="0 0 24 24" aria-hidden="true">
+				<path d="M5 9v6h4l5 5V4L9 9H5z"/>
+				<path class="waves" d="M16.5 8.5a4.5 4.5 0 010 7m2.5-9a7.5 7.5 0 010 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+			</svg>
+			<!-- Speaker (muted) -->
+			<svg class="icon icon-muted" viewBox="0 0 24 24" aria-hidden="true">
+				<path d="M5 9v6h4l5 5V4L9 9H5z"/>
+				<path d="M19 9l-6 6m0-6l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+			</svg>
+		</button>
 
 		<script src="design.js" type="module"></script>
 	</body>

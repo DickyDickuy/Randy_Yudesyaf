@@ -1,40 +1,48 @@
 const initCursor = () => {
-  const cursor = document.querySelector('#cursor');
-  if (!cursor) return;
+  const cursor = document.querySelector('#cursor'); // slow square
+  const cursorDot = document.querySelector('#cursorDot'); // fast dot
+  if (!cursor || !cursorDot) return;
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
 
   if (prefersReducedMotion || isCoarsePointer) {
     cursor.remove();
+    cursorDot.remove();
     document.body.style.cursor = 'auto';
     return;
   }
 
-  let x = window.innerWidth / 2;
-  let y = window.innerHeight / 2;
-  let currentX = x;
-  let currentY = y;
+  // Target = native pointer (tracked by dot instantly)
+  let targetX = window.innerWidth / 2;
+  let targetY = window.innerHeight / 2;
+  // Current = square position (lags behind target)
+  let currentX = targetX;
+  let currentY = targetY;
   let rafId = null;
 
   // Easing for cursor movement
   function easeInOut(t) {
     return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   }
-  const easeAmount = 0.22;
+  // Increase ease factor so the square catches up faster
+  const easeAmount = 0.36;
 
   const updatePosition = () => {
-    // Use ease-in-out for smoother following
+    // Dot: snap to target immediately (native-feel)
+    cursorDot.style.transform = `translate(calc(${targetX}px - 50%), calc(${targetY}px - 50%))`;
+    // Square: ease toward the dot position
     const ease = easeInOut(easeAmount);
-    currentX += (x - currentX) * ease;
-    currentY += (y - currentY) * ease;
+    currentX += (targetX - currentX) * ease;
+    currentY += (targetY - currentY) * ease;
     cursor.style.transform = `translate(calc(${currentX}px - 50%), calc(${currentY}px - 50%))`;
     rafId = requestAnimationFrame(updatePosition);
   };
 
   const handleMove = (event) => {
-    x = event.clientX;
-    y = event.clientY;
+    // Update target instantly; dot will snap each frame
+    targetX = event.clientX;
+    targetY = event.clientY;
     if (rafId === null) {
       rafId = requestAnimationFrame(updatePosition);
     }
@@ -78,14 +86,15 @@ const initPillRotation = () => {
   if (!pill) return;
 
   const variants = [
-    // Leader: switch to Manrope for more balanced, symmetric letterforms
-    { text: 'Leader', fontFamily: '"Manrope", sans-serif', fontStyle: 'normal', textTransform: 'uppercase' },
-    { text: 'Brother', fontFamily: '"Poppins", sans-serif', fontStyle: 'normal', textTransform: 'none' },
-    { text: 'Father', fontFamily: '"Crimson Pro", serif', fontStyle: 'normal', textTransform: 'none' },
-    { text: 'Human', fontFamily: '"Quicksand", sans-serif', fontStyle: 'normal', textTransform: 'none' },
+    // Leader: go bold, tall and distinct
+    { text: 'Leader', fontFamily: '"Bebas Neue", sans-serif', fontStyle: 'normal', textTransform: 'uppercase', fontWeight: '700' },
+    // Brother: rounded, friendlier look for contrast
+    { text: 'Brother', fontFamily: '"Manrope", sans-serif', fontStyle: 'normal', textTransform: 'none', fontWeight: '700' },
+    { text: 'Father', fontFamily: '"Crimson Pro", serif', fontStyle: 'normal', textTransform: 'none', fontWeight: '600' },
+    { text: 'Human', fontFamily: '"Quicksand", sans-serif', fontStyle: 'normal', textTransform: 'none', fontWeight: '600' },
     // New variants
-    { text: 'Traveler', fontFamily: '"Cormorant Garamond", serif', fontStyle: 'italic', textTransform: 'none' },
-    { text: 'Gamer', fontFamily: '"Press Start 2P", cursive', fontStyle: 'normal', textTransform: 'none' },
+    { text: 'Traveler', fontFamily: '"Cormorant Garamond", serif', fontStyle: 'italic', textTransform: 'none', fontWeight: '600' },
+    { text: 'Gamer', fontFamily: '"Minecraft", "Minecraft Ten", "Press Start 2P", monospace', fontStyle: 'normal', textTransform: 'none', fontWeight: '700' },
   ];
 
   const measurer = document.createElement('span');
@@ -93,10 +102,11 @@ const initPillRotation = () => {
   document.body.appendChild(measurer);
 
   let maxWidth = 0;
-  variants.forEach(({ text, fontFamily, fontStyle, textTransform }) => {
+  variants.forEach(({ text, fontFamily, fontStyle, textTransform, fontWeight }) => {
     measurer.style.fontFamily = fontFamily;
     measurer.style.fontStyle = fontStyle;
     measurer.style.textTransform = textTransform || 'none';
+    measurer.style.fontWeight = fontWeight || '400';
     measurer.textContent = text;
     const width = measurer.getBoundingClientRect().width;
     if (width > maxWidth) {
@@ -111,11 +121,12 @@ const initPillRotation = () => {
   }
 
   let index = 0;
-  const applyVariant = ({ text, fontFamily, fontStyle, textTransform }) => {
+  const applyVariant = ({ text, fontFamily, fontStyle, textTransform, fontWeight }) => {
     pill.textContent = text;
     pill.style.fontFamily = fontFamily;
     pill.style.fontStyle = fontStyle;
     pill.style.textTransform = textTransform || 'none';
+    pill.style.fontWeight = fontWeight || '400';
   };
 
   applyVariant(variants[index]);
@@ -125,6 +136,140 @@ const initPillRotation = () => {
     applyVariant(variants[index]);
   }, 1000);
 };
+
+// --- Background music (YouTube) ---
+function initBackgroundMusic() {
+  const btn = document.getElementById('audioToggle');
+  const containerId = 'ytAudio';
+  if (!btn) return;
+
+  let player = null;
+  let isMuted = true;
+  let isPlaying = false;
+
+  // Read URL or ID from data attribute; supports full YouTube links
+  const configured = (btn.getAttribute('data-yt') || '').trim();
+
+  function extractYouTubeInfo(input) {
+    // Returns { videoId, listId }
+    if (!input) return { videoId: 'g7KGDppyV4w', listId: null };
+    try {
+      const u = new URL(input);
+      // youtu.be/VIDEOID
+      if (u.hostname.includes('youtu.be')) {
+        const vid = u.pathname.replace('/', '') || null;
+        const listId = u.searchParams.get('list');
+        return { videoId: vid || 'g7KGDppyV4w', listId };
+      }
+      // youtube.com/watch?v=VIDEOID or /embed/VIDEOID
+      const v = u.searchParams.get('v')
+        || (u.pathname.includes('/embed/') ? u.pathname.split('/embed/')[1]?.split(/[?&]/)[0] : null);
+      const listId = u.searchParams.get('list');
+      return { videoId: v || 'g7KGDppyV4w', listId };
+    } catch {
+      // Not a URL – treat as plain video ID
+      return { videoId: input, listId: null };
+    }
+  }
+  const ytInfo = extractYouTubeInfo(configured);
+
+  function updateButton() {
+    btn.classList.toggle('is-muted', isMuted);
+    btn.classList.toggle('is-playing', isPlaying);
+    btn.setAttribute('aria-pressed', String(!isMuted));
+    btn.title = isMuted ? 'Unmute music' : 'Mute music';
+  }
+  updateButton();
+
+  function loadYT() {
+    return new Promise((resolve) => {
+      if (window.YT && window.YT.Player) return resolve(window.YT);
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      window.onYouTubeIframeAPIReady = () => resolve(window.YT);
+      document.head.appendChild(tag);
+    });
+  }
+
+  async function ensurePlayer() {
+    if (player) return player;
+    const YT = await loadYT();
+    player = new YT.Player(containerId, {
+      height: '0',
+      width: '0',
+      videoId: ytInfo.videoId,
+      playerVars: {
+        autoplay: 1, // try to start automatically
+        controls: 0,
+        modestbranding: 1,
+        loop: 1,
+        // For loop to work YouTube requires a playlist param.
+        // Use list if provided, otherwise repeat the same videoId.
+        playlist: ytInfo.listId || ytInfo.videoId,
+        ...(ytInfo.listId ? { listType: 'playlist', list: ytInfo.listId } : {}),
+      },
+      events: {
+        onReady: () => {
+          // Attempt autoplay with sound; if blocked, fall back to muted autoplay
+          const attemptAutoplay = () => {
+            try {
+              player.setVolume(60);
+              player.unMute();
+              player.playVideo();
+              isPlaying = true;
+              isMuted = false;
+              updateButton();
+              // verify after a short delay
+              setTimeout(() => {
+                const state = player.getPlayerState && player.getPlayerState();
+                // 1 = PLAYING, 3 = BUFFERING
+                if (state !== 1 && state !== 3) {
+                  // likely blocked: try muted autoplay
+                  player.mute();
+                  isMuted = true;
+                  player.playVideo();
+                  isPlaying = true;
+                  updateButton();
+                }
+              }, 300);
+            } catch (_) {
+              // last resort: muted autoplay
+              try {
+                player.mute();
+                player.playVideo();
+                isMuted = true;
+                isPlaying = true;
+                updateButton();
+              } catch {}
+            }
+          };
+          attemptAutoplay();
+        }
+      }
+    });
+    return player;
+  }
+
+  btn.addEventListener('click', async () => {
+    const p = await ensurePlayer();
+    if (!isPlaying) {
+      p.playVideo();
+      p.setVolume(60);
+      p.unMute();
+      isPlaying = true;
+      isMuted = false;
+      updateButton();
+      return;
+    }
+    // Toggle mute
+    isMuted = !isMuted;
+    if (isMuted) p.mute(); else p.unMute();
+    updateButton();
+  });
+
+  // Preload player immediately and attempt autoplay
+  ensurePlayer();
+}
 
 
 
@@ -283,6 +428,43 @@ const init = () => {
   initCursor();
   initPillRotation();
   initCarousel();
+  initBackgroundMusic();
+  initCaseStudies();
 };
 
 document.addEventListener('DOMContentLoaded', init);
+
+// --- Case studies hover preview ---
+function initCaseStudies() {
+  const items = Array.from(document.querySelectorAll('.cs-item'));
+  const preview = document.querySelector('.cs-preview');
+  const img = preview ? preview.querySelector('.cs-preview__img') : null;
+  if (!items.length || !preview || !img) return;
+
+  const padY = 24; // keep preview within viewport vertically
+
+  function positionPreview(yCenter) {
+    const vw = window.innerWidth;
+    const left = Math.max(vw * 0.38, Math.min(vw * 0.62, vw * 0.55));
+    const desiredTop = yCenter - preview.offsetHeight / 2;
+    const top = Math.max(padY, Math.min(window.innerHeight - preview.offsetHeight - padY, desiredTop));
+    preview.style.left = `${left}px`;
+    preview.style.top = `${top}px`;
+  }
+
+  items.forEach((el) => {
+    el.addEventListener('mouseenter', (e) => {
+      const src = el.getAttribute('data-preview');
+      if (src) img.src = src;
+      preview.classList.add('is-visible');
+      const rect = el.getBoundingClientRect();
+      positionPreview(rect.top + rect.height / 2);
+    });
+    el.addEventListener('mousemove', (e) => {
+      positionPreview(e.clientY);
+    });
+    el.addEventListener('mouseleave', () => {
+      preview.classList.remove('is-visible');
+    });
+  });
+}

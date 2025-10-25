@@ -120,6 +120,17 @@
 	color-scheme: light;
 }
 
+/* Optional local self-host hook for Minecraft font (drop files into Assets/fonts/) */
+@font-face {
+	font-family: 'Minecraft';
+	src: url('Assets/fonts/Minecraft.woff2') format('woff2'),
+		 url('Assets/fonts/Minecraft.woff') format('woff'),
+		 url('Assets/fonts/Minecraft.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
 body {
 	font-family: "Manrope", "Inter", system-ui, -apple-system, sans-serif;
 	cursor: none !important;
@@ -249,18 +260,26 @@ body {
 	border: 3px solid #fc5203;
 	transform: translate(-50%, -50%);
 	pointer-events: none;
-	transition: transform 0.2s ease, width 0.2s ease, height 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+	/* Let JS control the follow speed; keep only size/color transitions */
+	transition: width 0.2s ease, height 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 	z-index: 100;
 	display: grid;
 	place-items: center;
-	mix-blend-mode: difference;
+	mix-blend-mode: normal;
 }
 
-.cursor::after {
-	content: "";
+/* Separate fast-follow dot cursor (tracks native pointer instantly) */
+.cursor-dot {
+	position: fixed;
+	top: 0;
+	left: 0;
 	width: 6px;
 	height: 6px;
+	border-radius: 0;
 	background: #fc5203;
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+	z-index: 101;
 }
 
 .cursor.is-hover {
@@ -273,12 +292,45 @@ body {
 	border-color: #fc5203;
 }
 
+/* Audio toggle button */
+.audio-toggle {
+	position: fixed;
+	right: clamp(14px, 2vw, 22px);
+	bottom: clamp(14px, 2vw, 22px);
+	width: 48px;
+	height: 48px;
+	border-radius: 999px;
+	border: 3px solid #fc5203;
+	background: rgba(252, 246, 225, 0.8);
+	color: #fc5203; /* highlight color */
+	display: grid;
+	place-items: center;
+	transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+	z-index: 50;
+}
+.audio-toggle:hover { transform: scale(1.04); }
+.audio-toggle .icon { width: 22px; height: 22px; display: block; }
+.audio-toggle .icon-muted { display: block; }
+.audio-toggle .icon-volume { display: none; }
+.audio-toggle.is-playing:not(.is-muted) {
+	background: #fc5203;
+	color: #fcf6e1;
+}
+.audio-toggle.is-playing:not(.is-muted) .icon-volume { display: block; }
+.audio-toggle.is-playing:not(.is-muted) .icon-muted { display: none; }
+.audio-toggle.is-muted .icon-muted { display: block; }
+.audio-toggle.is-muted .icon-volume { display: none; }
+
 @media (max-width: 768px) {
 	body {
 		cursor: auto;
 	}
 
 	.cursor {
+		display: none;
+	}
+
+	.cursor-dot {
 		display: none;
 	}
 
@@ -348,5 +400,133 @@ body {
 
 	.hero-copy p {
 		letter-spacing: 0.01em;
+	}
+}
+
+/* =====================
+	 Case Studies Section
+	 ===================== */
+.cs-section {
+	/* Break out of the centered container to go nearly full screen */
+	width: 100vw;
+	position: relative;
+	left: 50%;
+	right: 50%;
+	margin-left: -50vw;
+	margin-right: -50vw;
+	margin-top: 4rem;
+	margin-bottom: 6rem;
+	padding-left: clamp(16px, 4vw, 48px);
+	padding-right: clamp(16px, 4vw, 48px);
+}
+.cs-header {
+	font-family: "Cormorant Garamond", serif;
+	font-style: italic;
+	font-size: clamp(1.2rem, 2vw, 1.6rem);
+	margin-bottom: 1rem;
+}
+.cs-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 20px;
+}
+.cs-item {
+		position: relative;
+		display: grid;
+		grid-template-columns: auto 1fr auto;
+		align-items: center;
+		gap: clamp(18px, 2vw, 28px);
+		border: 2px solid #fc5203;
+		border-radius: 18px;
+		padding: clamp(18px, 2.4vw, 26px) clamp(22px, 3vw, 34px);
+		background: #fcf6e1;
+		width: 100%;
+		min-height: clamp(96px, 10vw, 132px);
+		transition: background 420ms ease-in-out, border-radius 420ms ease-in-out, box-shadow 420ms ease-in-out;
+}
+.cs-item .cs-number {
+	font-family: "Bodoni Moda", serif;
+	font-weight: 700;
+	font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+		color: #fc5203;
+	min-width: 3ch;
+	line-height: 1;
+	letter-spacing: 0.02em;
+	transition: color 420ms ease-in-out;
+}
+.cs-item .cs-title {
+	font-family: "Manrope", sans-serif;
+	font-weight: 800;
+	letter-spacing: 0.01em;
+		color: #fc5203;
+	font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+	line-height: 1.15;
+		transition: color 420ms ease-in-out;
+}
+.cs-tags {
+	display: flex;
+	gap: 10px;
+}
+.cs-tags li {
+	font-family: "Cormorant Garamond", serif;
+	font-style: italic;
+		color: #fc5203;
+		border: 2px solid #fc5203;
+	border-radius: 999px;
+	padding: 6px 14px;
+	font-size: clamp(0.78rem, 1.5vw, 0.95rem);
+		transition: color 420ms ease-in-out, border-color 420ms ease-in-out, background-color 420ms ease-in-out;
+}
+.cs-item:hover {
+	background: #fc5203;
+	border-radius: 64px;
+	box-shadow: 0 14px 40px rgba(252, 82, 3, 0.25);
+}
+.cs-item:hover .cs-number,
+.cs-item:hover .cs-title,
+.cs-item:hover .cs-tags li {
+	color: #fcf6e1;
+	border-color: #fcf6e1;
+}
+
+/* Floating preview */
+.cs-preview {
+	position: fixed;
+	pointer-events: none;
+	inset: auto auto 0 50%;
+	width: min(560px, 46vw);
+	aspect-ratio: 16/10;
+	translate: -50% 0;
+	border-radius: 28px;
+	overflow: hidden;
+		border: 2px solid rgba(252, 82, 3, 0.9); /* tiny outline */
+		box-shadow: 0 20px 60px rgba(252, 82, 3, 0.25);
+	opacity: 0;
+	transform: translateY(12px) scale(0.98);
+	transition: opacity 320ms ease-in-out 80ms, transform 360ms ease-in-out 80ms;
+	z-index: 30;
+}
+.cs-preview.is-visible {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+}
+.cs-preview__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+@media (max-width: 900px) {
+	.cs-preview { display: none; }
+	.cs-item { border-radius: 28px; }
+	.cs-item:hover { border-radius: 28px; }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	.cs-preview,
+	.carousel-img-overlay,
+	.cs-item,
+	.cs-item .cs-title,
+	.cs-item .cs-tags li {
+		transition: none !important;
 	}
 }
