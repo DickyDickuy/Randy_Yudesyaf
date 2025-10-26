@@ -360,12 +360,33 @@ function initCarousel() {
   const track = document.getElementById('carouselTrack');
   if (!track) return;
 
+  // Setup skeleton for initially present items
+  const setupImgSkeleton = (container) => {
+    const img = container.querySelector('img');
+    if (!img) return;
+    const clearLoading = () => {
+      container.classList.remove('is-loading');
+      img.removeEventListener('load', clearLoading);
+      img.removeEventListener('error', clearLoading);
+    };
+    // If already loaded from cache
+    if (img.complete && img.naturalWidth > 0) {
+      clearLoading();
+    } else {
+      container.classList.add('is-loading');
+      img.addEventListener('load', clearLoading, { once: true });
+      img.addEventListener('error', clearLoading, { once: true });
+    }
+  };
+  Array.from(track.children).forEach((c) => setupImgSkeleton(c));
+
   // Duplicate images for seamless looping
   const imgs = Array.from(track.children);
   imgs.forEach(img => {
     const clone = img.cloneNode(true);
     clone.setAttribute('aria-hidden', 'true');
     track.appendChild(clone);
+    setupImgSkeleton(clone);
   });
 
   let trackWidth = 0;
@@ -544,6 +565,7 @@ function initCaseStudies() {
   const items = Array.from(document.querySelectorAll('.cs-item'));
   const preview = document.querySelector('.cs-preview');
   const img = preview ? preview.querySelector('.cs-preview__img') : null;
+  const skeleton = preview ? preview.querySelector('.cs-preview__skeleton') : null;
   if (!items.length || !preview || !img) return;
 
   const padY = 24; // vertical clamp so the preview stays within the section
@@ -573,10 +595,34 @@ function initCaseStudies() {
     preview.style.top = `${top}px`;
   }
 
+  let currentSrcToken = 0;
+  const setPreviewSrc = (src) => {
+    const token = ++currentSrcToken;
+    preview.classList.remove('is-img-loaded');
+    img.onload = () => {
+      if (currentSrcToken !== token) return;
+      preview.classList.add('is-img-loaded');
+    };
+    img.onerror = () => {
+      if (currentSrcToken !== token) return;
+      preview.classList.add('is-img-loaded');
+    };
+    img.src = src;
+    // If image already cached
+    if (img.complete && img.naturalWidth > 0) {
+      preview.classList.add('is-img-loaded');
+    }
+  };
+
+  // Initialize default preview load state
+  if (img.complete && img.naturalWidth > 0) {
+    preview.classList.add('is-img-loaded');
+  }
+
   items.forEach((el) => {
     el.addEventListener('mouseenter', () => {
       const src = el.getAttribute('data-preview');
-      if (src) img.src = src;
+      if (src) setPreviewSrc(src);
       currentEl = el;
       preview.classList.add('is-visible');
       positionPreviewFor(el);

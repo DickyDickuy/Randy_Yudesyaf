@@ -103,7 +103,7 @@
 	/* pointer-events: none; removed to allow drag */
 	border: none;
 	display: block;
-	transition: transform 0.3s ease;
+	transition: transform 0.3s ease, opacity 0.22s ease;
 	position: relative; /* create a baseline stacking context */
 	z-index: 0;         /* sits below the overlay */
 	will-change: transform;
@@ -125,6 +125,30 @@
 	/* On phones, each slide nearly full-width */
 	.carousel-img-container { width: 90vw; }
 }
+
+/* ===== Skeleton (shimmer) ===== */
+@keyframes skeleton-shimmer {
+	0% { background-position: -200% 0; }
+	100% { background-position: 200% 0; }
+}
+
+/* Carousel image skeleton overlay */
+.carousel-img-container { position: relative; }
+.carousel-img-container.is-loading::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 0;
+	background: linear-gradient(90deg,
+		rgba(240, 232, 209, 0.9) 25%,
+		rgba(255, 255, 255, 0.9) 37%,
+		rgba(240, 232, 209, 0.9) 63%);
+	background-size: 200% 100%;
+	animation: skeleton-shimmer 1.2s linear infinite;
+	z-index: 2;
+}
+.carousel-img-container.is-loading .carousel-img { opacity: 0; }
+.carousel-img-container:not(.is-loading) .carousel-img { opacity: 1; }
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&family=Playfair+Display:ital,wght@1,500;1,600&display=swap");
 
 :root {
@@ -574,7 +598,21 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	opacity: 1;
 	transform: translate(-50%, 0) scale(1);
 }
-.cs-preview__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cs-preview__img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  opacity: 0; transition: opacity 0.22s ease;
+}
+.cs-preview__skeleton {
+  position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(90deg,
+    rgba(240, 232, 209, 0.9) 25%,
+    rgba(255, 255, 255, 0.95) 37%,
+    rgba(240, 232, 209, 0.9) 63%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s linear infinite;
+}
+.cs-preview.is-img-loaded .cs-preview__img { opacity: 1; }
+.cs-preview.is-img-loaded .cs-preview__skeleton { opacity: 0; visibility: hidden; }
 
 @media (max-width: 900px) {
 	.cs-preview { display: none; }
