@@ -93,7 +93,6 @@ const initCursor = () => {
   document.addEventListener('pointerleave', handleLeave);
 
   // Touch-specific show/hide of a minimal cursor indicator
-  let prevTouchAction = '';
   document.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'touch') {
       trackingTouch = true;
@@ -101,10 +100,6 @@ const initCursor = () => {
       document.body.classList.add('show-touch-cursor');
       targetX = e.clientX;
       targetY = e.clientY;
-      // Disable browser touch gestures to ensure continuous pointer events
-      const el = document.documentElement;
-      prevTouchAction = el.style.touchAction;
-      el.style.touchAction = 'none';
       if (rafId === null) {
         rafId = requestAnimationFrame(updatePosition);
       }
@@ -115,8 +110,6 @@ const initCursor = () => {
       trackingTouch = false;
       activeTouchPointerId = null;
       document.body.classList.remove('show-touch-cursor');
-      // Restore touch gestures
-      document.documentElement.style.touchAction = prevTouchAction;
       handleLeave();
     }
   };
@@ -482,6 +475,8 @@ function initCarousel() {
 
   track.style.cursor = 'grab';
   track.addEventListener('pointerdown', (e) => {
+    // Don't hijack touch start to preserve natural page scrolling on touch
+    if (e.pointerType === 'touch') return;
     isDragging = true;
     dragStartX = e.clientX;
     dragLastX = e.clientX;
@@ -492,7 +487,8 @@ function initCarousel() {
     }
     track.style.cursor = 'grabbing';
     document.body.style.cursor = 'none'; // Always hide native cursor
-    e.preventDefault();
+    // Prevent default only for mouse/pen drag to avoid selecting text/images
+    if (e.pointerType !== 'touch') e.preventDefault();
   });
 
   track.addEventListener('pointermove', (e) => {
