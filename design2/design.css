@@ -346,6 +346,26 @@ body {
 	.cursor-dot { display: none !important; }
 }
 
+/* On touch devices, show a small dot that follows the finger only while touching */
+@media (pointer: coarse) {
+	body.show-touch-cursor,
+	body.show-touch-cursor *,
+	body.show-touch-cursor *:hover,
+	body.show-touch-cursor *:active,
+	body.show-touch-cursor *:focus { cursor: none !important; }
+	body.show-touch-cursor .cursor { display: grid !important; }
+	body.show-touch-cursor .cursor-dot { display: block !important; }
+}
+
+/* Also apply the show-touch-cursor behavior on hybrid devices that report fine pointers */
+body.show-touch-cursor,
+body.show-touch-cursor *,
+body.show-touch-cursor *:hover,
+body.show-touch-cursor *:active,
+body.show-touch-cursor *:focus { cursor: none !important; }
+body.show-touch-cursor .cursor { display: grid !important; }
+body.show-touch-cursor .cursor-dot { display: block !important; }
+
 @media (max-width: 1023px) {
 }
 
@@ -535,24 +555,24 @@ body {
 
 /* Floating preview */
 .cs-preview {
-	position: fixed;
+	position: absolute; /* anchor inside the case studies section */
 	pointer-events: none;
-	inset: auto auto 0 50%;
+	top: 0; /* will be positioned by JS */
+	left: 50%; /* horizontal center reference; JS will set an exact left */
 	width: min(560px, 46vw);
 	aspect-ratio: 16/10;
-	translate: -50% 0;
 	border-radius: 28px;
 	overflow: hidden;
 		border: 2px solid rgba(252, 82, 3, 0.9); /* tiny outline */
 		box-shadow: 0 20px 60px rgba(252, 82, 3, 0.25);
 	opacity: 0;
-	transform: translateY(12px) scale(0.98);
+	transform: translate(-50%, 12px) scale(0.98); /* keep centered horizontally */
 	transition: opacity 320ms ease-in-out 80ms, transform 360ms ease-in-out 80ms;
 	z-index: 30;
 }
 .cs-preview.is-visible {
 	opacity: 1;
-	transform: translateY(0) scale(1);
+	transform: translate(-50%, 0) scale(1);
 }
 .cs-preview__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 

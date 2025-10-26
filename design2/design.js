@@ -6,7 +6,8 @@ const initCursor = () => {
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
 
-  if (prefersReducedMotion || isCoarsePointer) {
+  // On reduced motion, disable custom cursors entirely
+  if (prefersReducedMotion) {
     cursor.remove();
     cursorDot.remove();
     document.body.style.cursor = 'auto';
@@ -20,6 +21,9 @@ const initCursor = () => {
   let currentX = targetX;
   let currentY = targetY;
   let rafId = null;
+  // For touch devices: only show/update while finger is down
+  let trackingTouch = false;
+  let activeTouchPointerId = null;
 
   // Easing for cursor movement
   function easeInOut(t) {
@@ -28,18 +32,39 @@ const initCursor = () => {
   // Increase ease factor so the square catches up faster
   const easeAmount = 0.36;
 
+  // Cache cursor sizes to avoid calc() in transforms on mobile
+  let cursorHalfW = cursor.offsetWidth / 2;
+  let cursorHalfH = cursor.offsetHeight / 2;
+  let dotHalfW = cursorDot.offsetWidth / 2;
+  let dotHalfH = cursorDot.offsetHeight / 2;
+  const recalcCursorSize = () => {
+    cursorHalfW = cursor.offsetWidth / 2;
+    cursorHalfH = cursor.offsetHeight / 2;
+    dotHalfW = cursorDot.offsetWidth / 2;
+    dotHalfH = cursorDot.offsetHeight / 2;
+  };
+  window.addEventListener('resize', recalcCursorSize);
+
   const updatePosition = () => {
     // Dot: snap to target immediately (native-feel)
-    cursorDot.style.transform = `translate(calc(${targetX}px - 50%), calc(${targetY}px - 50%))`;
+  cursorDot.style.transform = `translate3d(${targetX - dotHalfW}px, ${targetY - dotHalfH}px, 0)`;
     // Square: ease toward the dot position
-    const ease = easeInOut(easeAmount);
-    currentX += (targetX - currentX) * ease;
-    currentY += (targetY - currentY) * ease;
-    cursor.style.transform = `translate(calc(${currentX}px - 50%), calc(${currentY}px - 50%))`;
+    if (trackingTouch) {
+      // On touch, remove delay so it doesn't feel laggy
+      currentX = targetX;
+      currentY = targetY;
+    } else {
+      const ease = easeInOut(easeAmount);
+      currentX += (targetX - currentX) * ease;
+      currentY += (targetY - currentY) * ease;
+    }
+    cursor.style.transform = `translate3d(${currentX - cursorHalfW}px, ${currentY - cursorHalfH}px, 0)`;
     rafId = requestAnimationFrame(updatePosition);
   };
 
   const handleMove = (event) => {
+    // Only track touch position while finger is down; mouse/pen always track
+    if (event.pointerType === 'touch' && !trackingTouch) return;
     // Update target instantly; dot will snap each frame
     targetX = event.clientX;
     targetY = event.clientY;
@@ -58,12 +83,58 @@ const initCursor = () => {
   };
 
   const handleLeave = () => {
+    // Keep animating while an active touch is in progress
+    if (trackingTouch) return;
     cancelAnimationFrame(rafId);
     rafId = null;
   };
 
   document.addEventListener('pointermove', handleMove);
   document.addEventListener('pointerleave', handleLeave);
+
+  // Touch-specific show/hide of a minimal cursor indicator
+  let prevTouchAction = '';
+  document.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch') {
+      trackingTouch = true;
+      activeTouchPointerId = e.pointerId;
+      document.body.classList.add('show-touch-cursor');
+      targetX = e.clientX;
+      targetY = e.clientY;
+      // Disable browser touch gestures to ensure continuous pointer events
+      const el = document.documentElement;
+      prevTouchAction = el.style.touchAction;
+      el.style.touchAction = 'none';
+      if (rafId === null) {
+        rafId = requestAnimationFrame(updatePosition);
+      }
+    }
+  });
+  const endTouch = (e) => {
+    if (e.pointerType === 'touch') {
+      trackingTouch = false;
+      activeTouchPointerId = null;
+      document.body.classList.remove('show-touch-cursor');
+      // Restore touch gestures
+      document.documentElement.style.touchAction = prevTouchAction;
+      handleLeave();
+    }
+  };
+  document.addEventListener('pointerup', endTouch);
+  document.addEventListener('pointercancel', endTouch);
+
+  // Higher frequency updates on Chromium for smoother touch tracking
+  document.addEventListener('pointerrawupdate', (e) => {
+    if (e.pointerType === 'touch') {
+      if (!trackingTouch) return;
+      if (activeTouchPointerId !== null && e.pointerId !== activeTouchPointerId) return;
+      targetX = e.clientX;
+      targetY = e.clientY;
+      if (rafId === null) {
+        rafId = requestAnimationFrame(updatePosition);
+      }
+    }
+  });
 
   const interactiveElements = document.querySelectorAll('[data-cursor]');
 
@@ -314,6 +385,9 @@ function initCarousel() {
 
   let animating = true;
   let lastTime = performance.now();
+  // Track wheel momentum window (max 5s) and source of velocity
+  let wheelMomentumUntil = 0; // timestamp (ms) when wheel momentum should end
+  let vxSource = null; // 'wheel' | 'drag' | null
 
   function animate(now) {
     const dt = Math.min(0.05, (now - lastTime) / 1000); // seconds, cap to avoid jumps
@@ -323,6 +397,21 @@ function initCarousel() {
     if (!isDragging) {
       if (vx > 0) vx = Math.max(0, vx - friction * dt);
       else if (vx < 0) vx = Math.min(0, vx + friction * dt);
+    }
+
+    // Enforce max 5s wheel momentum: after the window, clamp wheel-induced vx back to 0
+    if (!isDragging && vxSource === 'wheel') {
+      const nowMs = performance.now();
+      if (nowMs > wheelMomentumUntil) {
+        // Apply strong braking to quickly settle to drift
+        const extraFriction = 600; // px/s^2
+        if (vx > 0) vx = Math.max(0, vx - extraFriction * dt);
+        else if (vx < 0) vx = Math.min(0, vx + extraFriction * dt);
+        if (Math.abs(vx) < 1) {
+          vx = 0;
+          vxSource = null;
+        }
+      }
     }
 
     // Integrate position with drift (disabled while dragging for direct control)
@@ -349,7 +438,10 @@ function initCarousel() {
     if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
       // Add to velocity in px/s, scaled from wheel delta (reversed: down=left)
       vx -= e.deltaY * 0.75; // scroll down = negative deltaY = carousel moves left
-      lastWheelTime = performance.now();
+  lastWheelTime = performance.now();
+  // Allow wheel-induced momentum for up to 5 seconds from the last wheel event
+  wheelMomentumUntil = lastWheelTime + 5000;
+  vxSource = 'wheel';
       // Prevent page scroll if at top or bottom
       const atTop = window.scrollY === 0;
       const atBottom = Math.abs(window.innerHeight + window.scrollY - document.body.scrollHeight) < 2;
@@ -407,6 +499,7 @@ function initCarousel() {
   const maxV = 300; // px/s (quarter of previous)
   const injected = lastDragVelocity * 0.25;
   vx = Math.abs(injected) > 5 ? Math.max(-maxV, Math.min(maxV, injected)) : 0;
+    vxSource = 'drag';
     if (track.releasePointerCapture) {
       try { track.releasePointerCapture(e.pointerId); } catch (err) {}
     }
@@ -420,6 +513,7 @@ function initCarousel() {
   const maxV = 300;
   const injected = lastDragVelocity * 0.25;
   vx = Math.abs(injected) > 5 ? Math.max(-maxV, Math.min(maxV, injected)) : 0;
+    vxSource = 'drag';
     if (track.releasePointerCapture) {
       try { track.releasePointerCapture(e.pointerId); } catch (err) {}
     }
@@ -452,30 +546,56 @@ function initCaseStudies() {
   const img = preview ? preview.querySelector('.cs-preview__img') : null;
   if (!items.length || !preview || !img) return;
 
-  const padY = 24; // keep preview within viewport vertically
+  const padY = 24; // vertical clamp so the preview stays within the section
+  const section = document.querySelector('.cs-section');
+  if (!section) return;
 
-  function positionPreview(yCenter) {
-    const vw = window.innerWidth;
-    const left = Math.max(vw * 0.38, Math.min(vw * 0.62, vw * 0.55));
-    const desiredTop = yCenter - preview.offsetHeight / 2;
-    const top = Math.max(padY, Math.min(window.innerHeight - preview.offsetHeight - padY, desiredTop));
-    preview.style.left = `${left}px`;
+  let currentEl = null;
+
+  // Position the preview centered on the hovered item, within the section
+  function positionPreviewFor(el) {
+    if (!el) return;
+    const secRect = section.getBoundingClientRect();
+    const itemRect = el.getBoundingClientRect();
+    const secWidth = secRect.width;
+    const previewH = preview.offsetHeight || 0;
+
+    // Horizontal position: center in the right side of the section
+    const desiredCenter = secWidth * 0.55;
+    const centerX = Math.max(secWidth * 0.38, Math.min(secWidth * 0.62, desiredCenter));
+    preview.style.left = `${centerX}px`;
+
+    // Vertical position: align to item center relative to the section, clamped
+    const itemMidY = itemRect.top - secRect.top + itemRect.height / 2;
+    let top = itemMidY - previewH / 2;
+    const maxTop = section.offsetHeight - previewH - padY;
+    top = Math.max(padY, Math.min(maxTop, top));
     preview.style.top = `${top}px`;
   }
 
   items.forEach((el) => {
-    el.addEventListener('mouseenter', (e) => {
+    el.addEventListener('mouseenter', () => {
       const src = el.getAttribute('data-preview');
       if (src) img.src = src;
+      currentEl = el;
       preview.classList.add('is-visible');
-      const rect = el.getBoundingClientRect();
-      positionPreview(rect.top + rect.height / 2);
-    });
-    el.addEventListener('mousemove', (e) => {
-      positionPreview(e.clientY);
+      positionPreviewFor(el);
     });
     el.addEventListener('mouseleave', () => {
       preview.classList.remove('is-visible');
+      currentEl = null;
     });
   });
+
+  // Keep the preview anchored to the item while scrolling/resizing
+  let rafId = null;
+  const scheduleReposition = () => {
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      if (currentEl) positionPreviewFor(currentEl);
+    });
+  };
+  window.addEventListener('scroll', scheduleReposition, { passive: true });
+  window.addEventListener('resize', scheduleReposition);
 }
