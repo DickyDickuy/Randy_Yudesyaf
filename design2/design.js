@@ -552,6 +552,7 @@ const init = () => {
   initCarousel();
   initBackgroundMusic();
   initCaseStudies();
+  initStickyNotes();
 };
 
 document.addEventListener('DOMContentLoaded', init);
@@ -640,4 +641,23 @@ function initCaseStudies() {
   };
   window.addEventListener('scroll', scheduleReposition, { passive: true });
   window.addEventListener('resize', scheduleReposition);
+}
+
+// --- Sticky Notes functionality ---
+function initStickyNotes() {
+  const stickyNotes = document.querySelectorAll('.sticky-note');
+  if (!stickyNotes.length) return;
+
+  // Add click handlers for zoom effect
+  stickyNotes.forEach((note) => {
+    note.addEventListener('click', () => {
+      // The zoom effect is handled by CSS :active pseudo-class
+      // Add a brief additional effect if needed
+      note.style.transform = note.style.transform.replace('scale(1.1)', '') + ' scale(1.15)';
+      
+      setTimeout(() => {
+        note.style.transform = note.style.transform.replace(' scale(1.15)', '');
+      }, 150);
+    });
+  });
 }
