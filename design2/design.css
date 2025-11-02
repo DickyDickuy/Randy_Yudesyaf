@@ -334,34 +334,199 @@ body {
 	border-width: 3px;
 }
 
-/* Audio toggle button */
-.audio-toggle {
+/* Spotify Container */
+.spotify-container {
 	position: fixed;
 	right: clamp(14px, 2vw, 22px);
 	bottom: clamp(14px, 2vw, 22px);
+	z-index: 50;
+}
+
+/* Audio toggle button */
+.audio-toggle {
 	width: 48px;
 	height: 48px;
 	border-radius: 999px;
 	border: 3px solid #fc5203;
 	background: rgba(252, 246, 225, 0.8);
-	color: #fc5203; /* highlight color */
+	color: #fc5203;
 	display: grid;
 	place-items: center;
 	transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
-	z-index: 50;
+	cursor: pointer;
 }
-.audio-toggle:hover { transform: scale(1.04); }
-.audio-toggle .icon { width: 22px; height: 22px; display: block; }
-.audio-toggle .icon-muted { display: block; }
-.audio-toggle .icon-volume { display: none; }
-.audio-toggle.is-playing:not(.is-muted) {
+
+.audio-toggle:hover { 
+	transform: scale(1.04); 
 	background: #fc5203;
 	color: #fcf6e1;
 }
-.audio-toggle.is-playing:not(.is-muted) .icon-volume { display: block; }
-.audio-toggle.is-playing:not(.is-muted) .icon-muted { display: none; }
-.audio-toggle.is-muted .icon-muted { display: block; }
-.audio-toggle.is-muted .icon-volume { display: none; }
+
+.audio-toggle .icon { 
+	width: 22px; 
+	height: 22px; 
+	display: block; 
+	fill: currentColor;
+}
+
+/* Spotify Popup */
+.spotify-popup {
+	position: absolute;
+	bottom: 60px;
+	right: 0;
+	width: 320px;
+	background: rgba(252, 246, 225, 0.95);
+	border: 3px solid #fc5203;
+	border-radius: 12px;
+	box-shadow: 0 8px 32px rgba(252, 82, 3, 0.3);
+	backdrop-filter: blur(10px);
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(10px) scale(0.95);
+	transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.spotify-container:hover .spotify-popup,
+.spotify-popup:hover {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0) scale(1);
+}
+
+.spotify-header {
+	padding: 16px;
+	border-bottom: 2px solid rgba(252, 82, 3, 0.2);
+}
+
+.spotify-current-track {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.track-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.track-title {
+	font-family: "Manrope", sans-serif;
+	font-weight: 600;
+	font-size: 14px;
+	color: #fc5203;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin-bottom: 2px;
+}
+
+.track-artist {
+	font-family: "Cormorant Garamond", serif;
+	font-style: italic;
+	font-size: 12px;
+	color: rgba(252, 82, 3, 0.7);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.playlist-toggle {
+	background: none;
+	border: 2px solid #fc5203;
+	border-radius: 50%;
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fc5203;
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+.playlist-toggle:hover {
+	background: #fc5203;
+	color: #fcf6e1;
+	transform: rotate(180deg);
+}
+
+.playlist-toggle svg {
+	fill: currentColor;
+	transition: transform 0.2s ease;
+}
+
+.spotify-playlist {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.3s ease;
+}
+
+.spotify-playlist.expanded {
+	max-height: 400px;
+}
+
+.spotify-playlist iframe {
+	border-radius: 0 0 9px 9px;
+	background: #fcf6e1;
+}
+
+/* Responsive Spotify Player */
+@media (max-width: 768px) {
+	.spotify-popup {
+		width: 280px;
+		right: -10px;
+	}
+	
+	.spotify-playlist.expanded {
+		max-height: 320px;
+	}
+	
+	.spotify-playlist iframe {
+		height: 300px;
+	}
+}
+
+@media (max-width: 480px) {
+	.spotify-popup {
+		width: 260px;
+		right: -20px;
+		bottom: 50px;
+	}
+	
+	.track-title {
+		font-size: 13px;
+	}
+	
+	.track-artist {
+		font-size: 11px;
+	}
+	
+	.spotify-playlist.expanded {
+		max-height: 280px;
+	}
+	
+	.spotify-playlist iframe {
+		height: 260px;
+	}
+}
+
+/* Touch device adjustments */
+@media (pointer: coarse) {
+	.spotify-container:hover .spotify-popup {
+		/* Disable pure hover on touch devices */
+		opacity: 0;
+		visibility: hidden;
+	}
+	
+	/* Show on tap/touch for mobile */
+	.spotify-container.active .spotify-popup,
+	.spotify-popup.active {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0) scale(1);
+	}
+}
 
 /* Hide custom cursor only on touch/coarse pointers; keep it on small viewports with mice */
 @media (pointer: coarse) {
@@ -684,7 +849,7 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	right: 0;
 	border-width: 0 1.8rem 1.8rem 0;
 	border-style: solid;
-	border-color: rgba(252, 246, 225, 0.6) #fcf6e1;
+		border-color: rgba(252, 246, 225, 0.6) #fcf6e1;
 	transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
 	z-index: 2;
 }
@@ -776,24 +941,24 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	}
 	
 	/* Adjust positioning for tablets */
-	.sticky-note[style*="top: 18%; left: 15%"] {
-		top: 15% !important;
-		left: 12% !important;
+	.sticky-note[style*="top: 10%; left: 8%"] {
+		top: 12% !important;
+		left: 8% !important;
 	}
-	
-	.sticky-note[style*="top: 20%; right: 15%"] {
-		top: 15% !important;
-		right: 12% !important;
+    
+	.sticky-note[style*="top: 14%; right: 6%"] {
+		top: 12% !important;
+		right: 8% !important;
 	}
-	
-	.sticky-note[style*="bottom: 22%; left: 18%"] {
-		bottom: 20% !important;
-		left: 15% !important;
+    
+	.sticky-note[style*="bottom: 8%; left: 12%"] {
+		bottom: 12% !important;
+		left: 10% !important;
 	}
-	
-	.sticky-note[style*="bottom: 18%; right: 18%"] {
-		bottom: 20% !important;
-		right: 15% !important;
+    
+	.sticky-note[style*="bottom: 6%; right: 10%"] {
+		bottom: 10% !important;
+		right: 10% !important;
 	}
 }
 
@@ -824,24 +989,24 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	}
 	
 	/* Fine-tune positioning for mobile */
-	.sticky-note[style*="top: 18%; left: 15%"] {
-		top: 12% !important;
-		left: 10% !important;
+	.sticky-note[style*="top: 10%; left: 8%"] {
+		top: 10% !important;
+		left: 6% !important;
 	}
-	
-	.sticky-note[style*="top: 20%; right: 15%"] {
-		top: 12% !important;
-		right: 10% !important;
+    
+	.sticky-note[style*="top: 14%; right: 6%"] {
+		top: 10% !important;
+		right: 6% !important;
 	}
-	
-	.sticky-note[style*="bottom: 22%; left: 18%"] {
-		bottom: 18% !important;
-		left: 12% !important;
+    
+	.sticky-note[style*="bottom: 8%; left: 12%"] {
+		bottom: 14% !important;
+		left: 8% !important;
 	}
-	
-	.sticky-note[style*="bottom: 18%; right: 18%"] {
-		bottom: 18% !important;
-		right: 12% !important;
+    
+	.sticky-note[style*="bottom: 6%; right: 10%"] {
+		bottom: 8% !important;
+		right: 6% !important;
 	}
 }
 

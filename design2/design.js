@@ -210,140 +210,91 @@ const initPillRotation = () => {
   }, 1000);
 };
 
-// --- Background music (YouTube) ---
-function initBackgroundMusic() {
-  const btn = document.getElementById('audioToggle');
-  const containerId = 'ytAudio';
-  if (!btn) return;
+// --- Spotify Music Player ---
+function initSpotifyPlayer() {
+  const playlistToggle = document.getElementById('playlistToggle');
+  const spotifyPlaylist = document.getElementById('spotifyPlaylist');
+  const trackTitle = document.querySelector('.track-title');
+  const trackArtist = document.querySelector('.track-artist');
+  
+  if (!playlistToggle || !spotifyPlaylist) return;
 
-  let player = null;
-  let isMuted = true;
-  let isPlaying = false;
-  const autoplayDelayMs = 1500; // delay autoplay attempt after reload
+  // Update track info with playlist info
+  trackTitle.textContent = 'Randy\'s Taste in Music';
 
-  // Read URL or ID from data attribute; supports full YouTube links
-  const configured = (btn.getAttribute('data-yt') || '').trim();
-
-  function extractYouTubeInfo(input) {
-    // Returns { videoId, listId }
-    if (!input) return { videoId: 'g7KGDppyV4w', listId: null };
-    try {
-      const u = new URL(input);
-      // youtu.be/VIDEOID
-      if (u.hostname.includes('youtu.be')) {
-        const vid = u.pathname.replace('/', '') || null;
-        const listId = u.searchParams.get('list');
-        return { videoId: vid || 'g7KGDppyV4w', listId };
-      }
-      // youtube.com/watch?v=VIDEOID or /embed/VIDEOID
-      const v = u.searchParams.get('v')
-        || (u.pathname.includes('/embed/') ? u.pathname.split('/embed/')[1]?.split(/[?&]/)[0] : null);
-      const listId = u.searchParams.get('list');
-      return { videoId: v || 'g7KGDppyV4w', listId };
-    } catch {
-      // Not a URL – treat as plain video ID
-      return { videoId: input, listId: null };
+  // Toggle playlist visibility
+  playlistToggle.addEventListener('click', () => {
+    const isExpanded = spotifyPlaylist.classList.contains('expanded');
+    
+    if (isExpanded) {
+      spotifyPlaylist.classList.remove('expanded');
+      playlistToggle.style.transform = 'rotate(0deg)';
+    } else {
+      spotifyPlaylist.classList.add('expanded');
+      playlistToggle.style.transform = 'rotate(180deg)';
     }
-  }
-  const ytInfo = extractYouTubeInfo(configured);
-
-  function updateButton() {
-    btn.classList.toggle('is-muted', isMuted);
-    btn.classList.toggle('is-playing', isPlaying);
-    btn.setAttribute('aria-pressed', String(!isMuted));
-    btn.title = isMuted ? 'Unmute music' : 'Mute music';
-  }
-  updateButton();
-
-  function loadYT() {
-    return new Promise((resolve) => {
-      if (window.YT && window.YT.Player) return resolve(window.YT);
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      window.onYouTubeIframeAPIReady = () => resolve(window.YT);
-      document.head.appendChild(tag);
-    });
-  }
-
-  async function ensurePlayer() {
-    if (player) return player;
-    const YT = await loadYT();
-    player = new YT.Player(containerId, {
-      height: '0',
-      width: '0',
-      videoId: ytInfo.videoId,
-      playerVars: {
-        autoplay: 1, // try to start automatically
-        controls: 0,
-        modestbranding: 1,
-        loop: 1,
-        playsinline: 1,
-        // For loop to work YouTube requires a playlist param.
-        // Use list if provided, otherwise repeat the same videoId.
-        playlist: ytInfo.listId || ytInfo.videoId,
-        ...(ytInfo.listId ? { listType: 'playlist', list: ytInfo.listId } : {}),
-      },
-      events: {
-        onReady: () => {
-          // Attempt autoplay after a short delay; if blocked, fall back to muted autoplay
-          const attemptAutoplay = () => {
-            try {
-              player.setVolume(60);
-              player.unMute();
-              player.playVideo();
-              isPlaying = true;
-              isMuted = false;
-              updateButton();
-              // verify after a short delay
-              setTimeout(() => {
-                const state = player.getPlayerState && player.getPlayerState();
-                // 1 = PLAYING, 3 = BUFFERING
-                if (state !== 1 && state !== 3) {
-                  // likely blocked: try muted autoplay (guaranteed by policy)
-                  player.mute();
-                  isMuted = true;
-                  player.playVideo();
-                  isPlaying = true;
-                  updateButton();
-                }
-              }, 300);
-            } catch (_) {
-              // last resort: muted autoplay
-              try {
-                player.mute();
-                player.playVideo();
-                isMuted = true;
-                isPlaying = true;
-                updateButton();
-              } catch {}
-            }
-          };
-          setTimeout(attemptAutoplay, autoplayDelayMs);
-        }
-      }
-    });
-    return player;
-  }
-
-  btn.addEventListener('click', async () => {
-    const p = await ensurePlayer();
-    if (!isPlaying) {
-      p.playVideo();
-      p.setVolume(60);
-      p.unMute();
-      isPlaying = true;
-      isMuted = false;
-      updateButton();
-      return;
-    }
-    // Toggle mute
-    isMuted = !isMuted;
-    if (isMuted) p.mute(); else p.unMute();
-    updateButton();
   });
 
-  // Preload player immediately; autoplay will be attempted after a short delay when ready
-  ensurePlayer();
+  // Handle popup visibility with improved hover detection
+  const spotifyContainer = document.querySelector('.spotify-container');
+  const spotifyPopup = document.getElementById('spotifyPopup');
+  const audioToggle = document.getElementById('audioToggle');
+  let hoverTimeout;
+  let isPopupVisible = false;
+
+  const showPopup = () => {
+    clearTimeout(hoverTimeout);
+    isPopupVisible = true;
+    spotifyPopup.style.opacity = '1';
+    spotifyPopup.style.visibility = 'visible';
+    spotifyPopup.style.transform = 'translateY(0) scale(1)';
+    spotifyContainer.classList.add('active');
+    spotifyPopup.classList.add('active');
+  };
+
+  const hidePopup = () => {
+    hoverTimeout = setTimeout(() => {
+      isPopupVisible = false;
+      spotifyPopup.style.opacity = '0';
+      spotifyPopup.style.visibility = 'hidden';
+      spotifyPopup.style.transform = 'translateY(10px) scale(0.95)';
+      spotifyContainer.classList.remove('active');
+      spotifyPopup.classList.remove('active');
+      // Close playlist when hiding popup
+      spotifyPlaylist.classList.remove('expanded');
+      playlistToggle.style.transform = 'rotate(0deg)';
+    }, 150);
+  };
+
+  // Check if device supports touch
+  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
+  if (isTouchDevice) {
+    // Touch device behavior
+    audioToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isPopupVisible) {
+        hidePopup();
+      } else {
+        showPopup();
+      }
+    });
+    
+    // Close popup when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!spotifyContainer.contains(e.target) && isPopupVisible) {
+        hidePopup();
+      }
+    });
+  } else {
+    // Desktop hover behavior
+    spotifyContainer.addEventListener('mouseenter', showPopup);
+    spotifyContainer.addEventListener('mouseleave', hidePopup);
+    
+    // Keep popup visible when hovering over it
+    spotifyPopup.addEventListener('mouseenter', showPopup);
+    spotifyPopup.addEventListener('mouseleave', hidePopup);
+  }
 }
 
 
@@ -550,7 +501,7 @@ const init = () => {
   initCursor();
   initPillRotation();
   initCarousel();
-  initBackgroundMusic();
+  initSpotifyPlayer();
   initCaseStudies();
   initStickyNotes();
 };
