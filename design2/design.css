@@ -684,7 +684,7 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	right: 0;
 	border-width: 0 1.8rem 1.8rem 0;
 	border-style: solid;
-	border-color: rgba(252, 246, 225, 0.9) rgba(252, 246, 225, 0.3);
+	border-color: rgba(252, 246, 225, 0.6) #fcf6e1;
 	transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
 	z-index: 2;
 }
