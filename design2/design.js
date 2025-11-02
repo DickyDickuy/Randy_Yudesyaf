@@ -32,22 +32,10 @@ const initCursor = () => {
   // Increase ease factor so the square catches up faster
   const easeAmount = 0.36;
 
-  // Cache cursor sizes to avoid calc() in transforms on mobile
-  let cursorHalfW = cursor.offsetWidth / 2;
-  let cursorHalfH = cursor.offsetHeight / 2;
-  let dotHalfW = cursorDot.offsetWidth / 2;
-  let dotHalfH = cursorDot.offsetHeight / 2;
-  const recalcCursorSize = () => {
-    cursorHalfW = cursor.offsetWidth / 2;
-    cursorHalfH = cursor.offsetHeight / 2;
-    dotHalfW = cursorDot.offsetWidth / 2;
-    dotHalfH = cursorDot.offsetHeight / 2;
-  };
-  window.addEventListener('resize', recalcCursorSize);
-
   const updatePosition = () => {
     // Dot: snap to target immediately (native-feel)
-  cursorDot.style.transform = `translate3d(${targetX - dotHalfW}px, ${targetY - dotHalfH}px, 0)`;
+    // Use translate(-50%, -50%) from CSS to center, so just position at target coordinates
+    cursorDot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0) translate(-50%, -50%)`;
     // Square: ease toward the dot position
     if (trackingTouch) {
       // On touch, remove delay so it doesn't feel laggy
@@ -58,19 +46,36 @@ const initCursor = () => {
       currentX += (targetX - currentX) * ease;
       currentY += (targetY - currentY) * ease;
     }
-    cursor.style.transform = `translate3d(${currentX - cursorHalfW}px, ${currentY - cursorHalfH}px, 0)`;
+    cursor.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
     rafId = requestAnimationFrame(updatePosition);
   };
 
   const handleMove = (event) => {
     // Only track touch position while finger is down; mouse/pen always track
     if (event.pointerType === 'touch' && !trackingTouch) return;
+    
+    // Check if hovering over Spotify iframe specifically - if so, hide custom cursor and show native cursor
+    const el = event.target;
+    const onSpotifyIframe = !!el.closest('iframe[src*="spotify"]');
+    
+    if (onSpotifyIframe) {
+      // Hide custom cursors and show native cursor when over Spotify iframe
+      cursor.style.opacity = '0';
+      cursorDot.style.opacity = '0';
+      document.body.style.cursor = 'auto';
+      return;
+    } else {
+      // Show custom cursors and hide native cursor everywhere else
+      cursor.style.opacity = '1';
+      cursorDot.style.opacity = '1';
+      document.body.style.cursor = 'none';
+    }
+    
     // Update target instantly; dot will snap each frame
     targetX = event.clientX;
     targetY = event.clientY;
 
     // Context-aware dot color: turn cream on orange backgrounds
-    const el = event.target;
     const onPill = !!el.closest('.pill');
     const onCsItem = !!el.closest('.cs-item');
     const audio = el.closest('.audio-toggle');
@@ -228,10 +233,10 @@ function initSpotifyPlayer() {
     
     if (isExpanded) {
       spotifyPlaylist.classList.remove('expanded');
-      playlistToggle.style.transform = 'rotate(0deg)';
+      playlistToggle.style.transform = 'rotate(180deg)';
     } else {
       spotifyPlaylist.classList.add('expanded');
-      playlistToggle.style.transform = 'rotate(180deg)';
+      playlistToggle.style.transform = 'rotate(00deg)';
     }
   });
 
@@ -262,7 +267,7 @@ function initSpotifyPlayer() {
       spotifyPopup.classList.remove('active');
       // Close playlist when hiding popup
       spotifyPlaylist.classList.remove('expanded');
-      playlistToggle.style.transform = 'rotate(0deg)';
+      playlistToggle.style.transform = 'rotate(180deg)';
     }, 150);
   };
 
