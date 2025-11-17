@@ -1,31 +1,21 @@
-/* --- Carousel Section --- */
-
 .carousel-section {
 	border-top: 2.5px solid #fc5203;
 	background: #fcf6e1;
-	/* Full-bleed width; 100vw is correct (800vw caused the visual glitch) */
 	width: 100vw;
 	position: relative;
 	left: 50%;
 	right: 50%;
 	margin-left: -50vw;
 	margin-right: -50vw;
-	/* Remove invalid padding value (use the explicit padding below) */
-	padding: 0;
 	z-index: 2;
-	/* Remove fixed height constraints */
-	/* Tighten vertical spacing so images sit closer to the orange line */
 	padding: 12px 0 24px;
 }
 
 .carousel-img-container {
 	position: relative;
 	display: inline-block;
-	/* Prevent flexbox from shrinking items into thin strips */
 	flex: 0 0 auto;
-	/* Consistent desktop size: not huge, not tiny */
 	width: clamp(240px, 24vw, 420px);
-	/* Clip the zoomed image so the overlay can cover fully */
 	overflow: hidden;
 }
 
@@ -34,7 +24,6 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-		/* Slightly taller overlay and smoother gradient to remove visible band/gap */
 		height: 60%;
 		background: linear-gradient(
 			to top,
@@ -45,12 +34,11 @@
 		);
 	display: flex;
 	align-items: flex-end;
-	justify-content: flex-start; /* left align content */
-		padding: 0 16px 16px; /* left/right padding + bottom gap */
+	justify-content: flex-start;
+		padding: 0 16px 16px;
 	opacity: 0;
 		transition: opacity 320ms ease-in-out;
 	pointer-events: none;
-	/* ensure overlay paints above the image */
 	z-index: 1;
 }
 
@@ -90,27 +78,24 @@
   gap: 0;
   align-items: center;
   will-change: transform;
+	touch-action: pan-y;
 }
 .carousel-img {
 	aspect-ratio: 4/3;
-	/* Fill the container width; height follows aspect-ratio */
 	width: 100%;
 	border-radius: 0;
 	object-fit: cover;
 	background: none;
 	box-shadow: none;
 	user-select: none;
-	/* pointer-events: none; removed to allow drag */
 	border: none;
 	display: block;
 	transition: transform 0.3s ease, opacity 0.22s ease;
-	position: relative; /* create a baseline stacking context */
-	z-index: 0;         /* sits below the overlay */
+	position: relative;
+	z-index: 0;
 	will-change: transform;
 }
-.carousel-track {
-	touch-action: pan-y;
-}
+/* merged touch-action into primary .carousel-track block */
 @media (max-width: 900px) {
 	.carousel-section {
 		padding: 10px 0 20px;
@@ -126,13 +111,10 @@
 	.carousel-img-container { width: 90vw; }
 }
 
-/* ===== Skeleton (shimmer) ===== */
 @keyframes skeleton-shimmer {
 	0% { background-position: -200% 0; }
 	100% { background-position: 200% 0; }
 }
-
-/* Carousel image skeleton overlay */
 .carousel-img-container { position: relative; }
 .carousel-img-container.is-loading::before {
 	content: "";
@@ -149,13 +131,12 @@
 }
 .carousel-img-container.is-loading .carousel-img { opacity: 0; }
 .carousel-img-container:not(.is-loading) .carousel-img { opacity: 1; }
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&family=Playfair+Display:ital,wght@1,500;1,600&display=swap");
+
 
 :root {
 	color-scheme: light;
 }
 
-/* Optional local self-host hook for Minecraft font (drop files into Assets/fonts/) */
 @font-face {
 	font-family: 'Minecraft';
 	src: url('Assets/fonts/Minecraft.woff2') format('woff2'),
@@ -295,15 +276,12 @@ body {
 	border: 3px solid #fc5203;
 	transform: translate(-50%, -50%);
 	pointer-events: none;
-	/* Let JS control the follow speed; keep only size/color transitions */
 	transition: width 0.2s ease, height 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.15s ease;
 	z-index: 100;
 	display: grid;
 	place-items: center;
 	mix-blend-mode: normal;
 }
-
-/* Separate fast-follow dot cursor (tracks native pointer instantly) */
 .cursor-dot {
 	position: fixed;
 	top: 0;
@@ -317,8 +295,6 @@ body {
 	z-index: 101;
 	transition: opacity 0.15s ease;
 }
-
-/* Dot color swap when on orange backgrounds */
 .cursor-dot.is-cream {
 	background: #fcf6e1;
 }
@@ -329,21 +305,17 @@ body {
 }
 
 .cursor.is-solid {
-	/* Avoid covering content: keep it an outline-only state */
 	background: transparent;
 	border-color: #fc5203;
 	border-width: 3px;
 }
 
-/* Spotify Container */
 .spotify-container {
 	position: fixed;
 	right: clamp(14px, 2vw, 22px);
 	bottom: clamp(14px, 2vw, 22px);
 	z-index: 50;
 }
-
-/* Audio toggle button */
 .audio-toggle {
 	width: 48px;
 	height: 48px;
@@ -370,7 +342,6 @@ body {
 	fill: currentColor;
 }
 
-/* Spotify Popup */
 .spotify-popup {
 	position: absolute;
 	bottom: 60px;
@@ -472,7 +443,6 @@ body {
 	background: #fcf6e1;
 }
 
-/* Responsive Spotify Player */
 @media (max-width: 768px) {
 	.spotify-popup {
 		width: 280px;
@@ -512,7 +482,6 @@ body {
 	}
 }
 
-/* Touch device adjustments */
 @media (pointer: coarse) {
 	.spotify-container:hover .spotify-popup {
 		/* Disable pure hover on touch devices */
@@ -529,7 +498,6 @@ body {
 	}
 }
 
-/* Hide custom cursor only on touch/coarse pointers; keep it on small viewports with mice */
 @media (pointer: coarse) {
 	body, *, *:hover, *:active, *:focus { cursor: auto !important; }
 	.cursor { display: none !important; }
@@ -537,15 +505,7 @@ body {
 }
 
 /* On touch devices, show a small dot that follows the finger only while touching */
-@media (pointer: coarse) {
-	body.show-touch-cursor,
-	body.show-touch-cursor *,
-	body.show-touch-cursor *:hover,
-	body.show-touch-cursor *:active,
-	body.show-touch-cursor *:focus { cursor: none !important; }
-	body.show-touch-cursor .cursor { display: grid !important; }
-	body.show-touch-cursor .cursor-dot { display: block !important; }
-}
+/* removed duplicate show-touch-cursor rules under coarse pointer; global rules below cover all devices */
 
 /* Also apply the show-touch-cursor behavior on hybrid devices that report fine pointers */
 body.show-touch-cursor,
@@ -623,9 +583,6 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	}
 }
 
-/* =====================
-	 Case Studies Section
-	 ===================== */
 .cs-section {
 	/* Break out of the centered container to go nearly full screen */
 	width: 100vw;
@@ -743,7 +700,6 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	border-color: #fcf6e1;
 }
 
-/* Floating preview */
 .cs-preview {
 	position: absolute; /* anchor inside the case studies section */
 	pointer-events: none;
@@ -756,7 +712,7 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 		border: 2px solid rgba(252, 82, 3, 0.9); /* tiny outline */
 		box-shadow: 0 20px 60px rgba(252, 82, 3, 0.25);
 	opacity: 0;
-	transform: translate(-50%, 12px) scale(0.98); /* keep centered horizontally */
+	transform: translate(-50%, 12px) scale(0.98);
 	transition: opacity 320ms ease-in-out 80ms, transform 360ms ease-in-out 80ms;
 	z-index: 30;
 }
@@ -786,7 +742,6 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	.cs-item:hover { border-radius: 28px; }
 }
 
-/* --- Sticky Notes Whiteboard Section --- */
 .whiteboard-section {
 	margin-top: 6rem;
 	padding: 4rem 0;
@@ -813,15 +768,12 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	width: 100%;
 	height: 60vh;
 	min-height: 500px;
-	/* Use zebra board background image */
-	background-image: url('Assets/img/zebra-board.svg');
+	background-image: url('Assets/img/board.png');
 	background-size: cover;
 	background-position: center;
 	background-repeat: no-repeat;
 	margin: 0 auto;
-	max-width: 1000px;
-	/* Keep subtle shadow for depth */
-	box-shadow: 0 10px 30px rgba(252, 82, 3, 0.1);
+	max-width: 1000px
 }
 
 .sticky-note {
@@ -853,8 +805,8 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	right: 0;
 	border-width: 0 1.8rem 1.8rem 0;
 	border-style: solid;
-		border-color: rgba(252, 246, 225, 0.6) #fcf6e1;
-	transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+	border-color: rgba(252, 246, 225, 0.6) #fcf6e1;
+	transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 0.2s;
 	z-index: 2;
 }
 
@@ -866,7 +818,7 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	width: 0;
 	height: 0;
 	background: #fcf6e1;
-	transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+	transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) 0.5s;
 	z-index: 2;
 	border-radius: 2px;
 	transform-origin: top right;
@@ -890,11 +842,9 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	transform: rotate(0deg) scale(1.1) !important;
 }
 
-.sticky-content {
-	opacity: 0;
-	transition: opacity 0.25s ease;
+.sticky-content { 
 	font-weight: 400;
-	z-index: 3;
+	z-index: 10;
 	position: relative;
 	color: #fc5203;
 }
@@ -903,7 +853,6 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	opacity: 1;
 }
 
-/* Responsive adjustments */
 @media (max-width: 1024px) {
 	.sticky-note {
 		font-size: clamp(0.55rem, 1.1vw, 0.8rem);
@@ -944,7 +893,6 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 		font-size: 1rem;
 	}
 	
-	/* Adjust positioning for tablets */
 	.sticky-note[style*="top: 10%; left: 8%"] {
 		top: 12% !important;
 		left: 8% !important;
@@ -992,7 +940,6 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 		border-width: 0 1.5rem 1.5rem 0;
 	}
 	
-	/* Fine-tune positioning for mobile */
 	.sticky-note[style*="top: 10%; left: 8%"] {
 		top: 10% !important;
 		left: 6% !important;
@@ -1014,7 +961,6 @@ body.show-touch-cursor .cursor-dot { display: block !important; }
 	}
 }
 
-/* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
 	.cs-preview,
 	.carousel-img-overlay,

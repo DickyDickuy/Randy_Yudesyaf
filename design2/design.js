@@ -1,3 +1,94 @@
+// --- Data (generated UI) ---
+const CAROUSEL_ITEMS = [
+  { src: 'Assets/img/cool_photo/2014.png', label: '08-2014', alt: '2014' },
+  { src: 'Assets/img/cool_photo/2014(2).png', label: '2014', alt: '2014' },
+  { src: 'Assets/img/cool_photo/2015.jpg', label: '2015', alt: '2015' },
+  { src: 'Assets/img/cool_photo/2015(2).jpg', label: '2015', alt: '2015' },
+  { src: 'Assets/img/cool_photo/2016.jpg', label: '2016', alt: '2016' },
+  { src: 'Assets/img/cool_photo/2017.jpg', label: '2017', alt: '2017' },
+  { src: 'Assets/img/cool_photo/2018.jpg', label: '2018', alt: '2018' },
+  { src: 'Assets/img/cool_photo/2019.jpg', label: '2019', alt: '2019' },
+  { src: 'Assets/img/cool_photo/2020.jpg', label: '2020', alt: '2020' },
+  { src: 'Assets/img/cool_photo/2021.jpg', label: '2021', alt: '2021' },
+  { src: 'Assets/img/cool_photo/2022.png', label: '2022', alt: '2022' },
+  { src: 'Assets/img/cool_photo/2023.jpg', label: '2023', alt: '2023' },
+  { src: 'Assets/img/cool_photo/2023(1).jpg', label: '2023', alt: '2023' },
+  { src: 'Assets/img/cool_photo/2024.jpg', label: '2024', alt: '2024' },
+  { src: 'Assets/img/cool_photo/2024(1).jpg', label: '2024', alt: '2024' },
+  { src: 'Assets/img/cool_photo/2025.png', label: '2025', alt: '2025' },
+];
+
+const CASE_STUDIES = [
+  { title: 'Art Installation HUT Astra 65 at Menara Astra & AMDI Building', preview: 'Assets/img/event/Art Installation HUT Astra 65 at Menara Astra & AMDI Building 👷🏽_♂️🪜.jpg', tags: ['Event Organizer'] },
+  { title: 'Break Out Day Festival by Djarum', preview: 'Assets/img/event/Break Out Day Festival by Djarum2O24.jpg', tags: ['Event Organizer'] },
+  { title: 'Campaign Activation Flip 2023', preview: 'Assets/img/event/Campaign Activavtion FLIP 2023.jpg', tags: ['Event Organizer'] },
+  { title: 'Ed Sheeran Divide World Tour 2019 Gelora Bung Karno Stadium Jakarta', preview: 'Assets/img/event/ED SHEERAN Divide World Tour 2019 Gelora Bung Karno Stadium 🏟 Jakarta, May 3rd 2019PK Entertain.jpg', tags: ['Event Organizer'] },
+  { title: 'Esmod Jakarta Creative Show 2023', preview: 'Assets/img/event/Esmod Jakarta Creative Show 2023 4.jpg', tags: ['Event Organizer'] },
+  { title: 'Godrej Pekan Raya Jakarta 2023', preview: 'Assets/img/event/Godrej PRJ 2023.gif', tags: ['Event Organizer'] },
+  { title: 'Grand Opening Premium Guest House OCBC 2024', preview: 'Assets/img/event/Grand Opening Premium Guest House OCBC 2024.jpg', tags: ['Event Organizer'] },
+  { title: 'HSBC 2025 Summit', preview: 'Assets/img/event/hsbc 2025 summit.jpg', tags: ['Event Organizer'] },
+  { title: 'HSBC Iftar', preview: 'Assets/img/event/HSBC Iftar.jpg', tags: ['Event Organizer'] },
+  { title: 'Java Jazz Festival 2017', preview: 'Assets/img/event/Java Jazz Festival 2017.PNG', tags: ['Event Organizer'] },
+  { title: 'Joyland Festival 2019', preview: 'Assets/img/event/Joyland Festival 2019.jpg', tags: ['Event Organizer'] },
+  { title: 'Synchronize Fest 2019', preview: 'Assets/img/event/menyambut malam dengan ungu nya awan di hari terakhir.jpg', tags: ['Event Organizer'] },
+  { title: 'OCBC Intimate Dinner 2024', preview: 'Assets/img/event/OCBC Intimate Dinner 2024 2.jpg', tags: ['Event Organizer'] },
+  { title: 'OLX Indonesia at Indonesia E-Commerce Summit Expo 2017', preview: 'Assets/img/event/OLXindo_IESE 2017.PNG', tags: ['Event Organizer'] },
+  { title: 'Pokemon Press Conference 2025', preview: 'Assets/img/event/POKEMON PRESS CONFERENCE 2025 - The Pokemon Company menggelar acara press conference pada tangga.jpg', tags: ['Event Organizer'] },
+  { title: 'Menara Astra 2022', preview: 'Assets/img/event/RAMADAN ART INSTALLATION MENARA ASTRA 2022.PNG', tags: ['Ramadhan Art Installation'] },
+  { title: 'Road To MotoGP Mandalika 2024', preview: 'Assets/img/event/Road To MotoGP Mandalika 2024.jpeg', tags: ['Event Organizer'] },
+  { title: 'Road To Summit Concept, HSBC 2024', preview: 'Assets/img/event/Road To SummitConcept, HSBC 2024.jpg', tags: ['Event Organizer', 'Tenant'] },
+];
+
+function renderCarousel(track, items) {
+  const frag = document.createDocumentFragment();
+  items.forEach(({ src, label, alt }) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'carousel-img-container';
+    const img = document.createElement('img');
+    img.className = 'carousel-img';
+    img.src = src;
+    img.alt = alt || label || '';
+    const overlay = document.createElement('div');
+    overlay.className = 'carousel-img-overlay';
+    const year = document.createElement('span');
+    year.className = 'carousel-img-year';
+    year.textContent = label || '';
+    overlay.appendChild(year);
+    wrap.appendChild(img);
+    wrap.appendChild(overlay);
+    frag.appendChild(wrap);
+  });
+  track.appendChild(frag);
+}
+
+function renderCaseStudies(listEl, studies) {
+  const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
+  const frag = document.createDocumentFragment();
+  studies.forEach((s, i) => {
+    const li = document.createElement('li');
+    li.className = 'cs-item';
+    if (s.preview) li.setAttribute('data-preview', s.preview);
+    const num = document.createElement('span');
+    num.className = 'cs-number';
+    num.textContent = pad2(i + 1);
+    const title = document.createElement('h3');
+    title.className = 'cs-title';
+    title.textContent = s.title;
+    const tags = document.createElement('ul');
+    tags.className = 'cs-tags';
+    (s.tags || []).forEach((t) => {
+      const liTag = document.createElement('li');
+      liTag.textContent = t;
+      tags.appendChild(liTag);
+    });
+    li.appendChild(num);
+    li.appendChild(title);
+    li.appendChild(tags);
+    frag.appendChild(li);
+  });
+  listEl.appendChild(frag);
+}
+
 const initCursor = () => {
   const cursor = document.querySelector('#cursor'); // slow square
   const cursorDot = document.querySelector('#cursorDot'); // fast dot
@@ -225,7 +316,7 @@ function initSpotifyPlayer() {
   if (!playlistToggle || !spotifyPlaylist) return;
 
   // Update track info with playlist info
-  trackTitle.textContent = 'Randy\'s Taste in Music';
+  trackTitle.textContent = 'Mood';
 
   // Toggle playlist visibility
   playlistToggle.addEventListener('click', () => {
@@ -308,6 +399,11 @@ function initSpotifyPlayer() {
 function initCarousel() {
   const track = document.getElementById('carouselTrack');
   if (!track) return;
+
+  // If no items present (after refactor), render from data
+  if (!track.children.length) {
+    renderCarousel(track, CAROUSEL_ITEMS);
+  }
 
   // Setup skeleton for initially present items
   const setupImgSkeleton = (container) => {
@@ -465,34 +561,22 @@ function initCarousel() {
     track.style.transform = `translateX(${pos}px)`;
   });
 
-  track.addEventListener('pointerup', (e) => {
+  const finishDrag = (pointerId) => {
     if (!isDragging) return;
     isDragging = false;
-  // Use last drag velocity for momentum at 25% (clamped)
-  const maxV = 300; // px/s (quarter of previous)
-  const injected = lastDragVelocity * 0.25;
-  vx = Math.abs(injected) > 5 ? Math.max(-maxV, Math.min(maxV, injected)) : 0;
+    const maxV = 300;
+    const injected = lastDragVelocity * 0.25;
+    vx = Math.abs(injected) > 5 ? Math.max(-maxV, Math.min(maxV, injected)) : 0;
     vxSource = 'drag';
-    if (track.releasePointerCapture) {
-      try { track.releasePointerCapture(e.pointerId); } catch (err) {}
-    }
-    track.style.cursor = 'grab';
-    document.body.style.cursor = 'none'; // Always hide native cursor
-  });
-
-  track.addEventListener('pointerleave', (e) => {
-    if (!isDragging) return;
-    isDragging = false;
-  const maxV = 300;
-  const injected = lastDragVelocity * 0.25;
-  vx = Math.abs(injected) > 5 ? Math.max(-maxV, Math.min(maxV, injected)) : 0;
-    vxSource = 'drag';
-    if (track.releasePointerCapture) {
-      try { track.releasePointerCapture(e.pointerId); } catch (err) {}
+    if (track.releasePointerCapture && typeof pointerId !== 'undefined') {
+      try { track.releasePointerCapture(pointerId); } catch (err) {}
     }
     track.style.cursor = 'grab';
     document.body.style.cursor = 'none';
-  });
+  };
+
+  track.addEventListener('pointerup', (e) => finishDrag(e.pointerId));
+  track.addEventListener('pointerleave', () => finishDrag());
 
   // Pause animation if not visible
   function onVisibility() {
@@ -503,6 +587,12 @@ function initCarousel() {
 }
 
 const init = () => {
+  // Render data-driven sections first
+  const csList = document.getElementById('csList');
+  if (csList && !csList.children.length) {
+    renderCaseStudies(csList, CASE_STUDIES);
+  }
+
   initCursor();
   initPillRotation();
   initCarousel();
