@@ -635,6 +635,8 @@ function initCaseStudies() {
     let top = itemMidY - previewH / 2;
     const maxTop = section.offsetHeight - previewH - padY;
     top = Math.max(padY, Math.min(maxTop, top));
+    
+    // Smooth inertia effect using CSS transition on top/left properties
     preview.style.top = `${top}px`;
   }
 
